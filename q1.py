@@ -23,29 +23,23 @@ def load_tensors():
     return _train_x_tensor, _test_x_tensor, _train_y_tensor, _test_y_tensor
 
 def train_model(x_tensor, y_tensor) -> torch.nn.Sequential:
-    torch.manual_seed(5963)
-    # Configurable: Your model structure
+    torch.manual_seed(5963)  
     model = torch.nn.Sequential(
-        torch.nn.Linear(len(PREDICTOR_COLUMNS), 8),  # Input 4 predictors, Output 8 neurons
-        torch.nn.Linear(8, len(TARGET_CLASS_DICT))   # Input 8 neurons, Output 3 classes (Setosa, Versicolor, Verginica)
-    )
-    # Cross Entropy Loss is used for classification
+        torch.nn.Linear(len(PREDICTOR_COLUMNS), 64),  
+        torch.nn.ReLU(), 
+        torch.nn.Linear(64, 32), 
+        torch.nn.ReLU(), 
+        torch.nn.Linear(32, len(TARGET_CLASS_DICT)) 
     loss_function = torch.nn.CrossEntropyLoss()
-
-    # Configurable: Hyper-parameters
-    num_epochs = 10
-    learning_rate = 0.8
-    # Configurable: optimizer
-    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-
-    # Start training
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    num_epochs = 100  # Increased number of epochs
     for epoch in range(num_epochs):
-        optimizer.zero_grad() # Resets gradients
-        train_predict = model(x_tensor)  # Make a prediction
-        loss = loss_function(train_predict, y_tensor)  # Calculate loss
-        loss.backward()  # Calculate gradient
-        optimizer.step()  # Update weights using the graident
-        if (epoch + 1) % (num_epochs/10) == 0:
+        optimizer.zero_grad()  
+        train_predict = model(x_tensor) 
+        loss = loss_function(train_predict, y_tensor)  
+        loss.backward()  
+        optimizer.step()  
+        if (epoch + 1) % 10 == 0:
             print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}')
     return model
 
